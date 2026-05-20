@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add New Record</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            padding: 2rem;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #495057;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            font-size: 1rem;
+            flex: 1;
+            text-align: center;
+            margin: 0 5px;
+        }
+        .btn-success {
+            background-color: #28a745;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Add New Record</h2>
+        <form onsubmit="handleSave(event)">
+            
+            <div class="form-group">
+                <label for="recordDate">Date:</label>
+                <input type="date" id="recordDate" name="recordDate" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <input type="text" id="category" name="category" placeholder="e.g., Regular Work" required>
+            </div>
+
+            <div class="form-group">
+                <label for="amTime">AM:</label>
+                <input type="time" id="amTime" name="amTime" required>
+            </div>
+
+            <div class="form-group">
+                <label for="pmTime">PM:</label>
+                <input type="time" id="pmTime" name="pmTime" required>
+            </div>
+
+            <div class="form-group">
+                <label for="percent100">100% (Hours):</label>
+                <input type="number" id="percent100" name="percent100" min="0" step="0.5" required>
+            </div>
+
+            <div class="form-group">
+                <label for="percent150">150% (Hours):</label>
+                <input type="number" id="percent150" name="percent150" min="0" step="0.5" required>
+            </div>
+
+            <div class="form-group">
+                <label for="percent200">200% (Hours):</label>
+                <input type="number" id="percent200" name="percent200" min="0" step="0.5" required>
+            </div>
+
+            <div class="action-buttons">
+                <button type="submit" class="btn btn-success">Save Record</button>
+                <a href="#" id="cancelBtn" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Extract parameters from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const month = urlParams.get('month') || 'January'; 
+        const username = urlParams.get('username') || 'admin';
+
+        // Setup the Cancel button
+        const cancelBtn = document.getElementById('cancelBtn');
+        let backUrl = 'working-record-table.html?month=' + encodeURIComponent(month) + '&username=' + encodeURIComponent(username);
+        cancelBtn.href = backUrl;
+
+        function handleSave(event) {
+            event.preventDefault(); // Prevent default form submission
+            
+            // Gather the data from the form
+            const newRecord = {
+                date: document.getElementById('recordDate').value,
+                category: document.getElementById('category').value,
+                am: document.getElementById('amTime').value,
+                pm: document.getElementById('pmTime').value,
+                p100: parseFloat(document.getElementById('percent100').value) || 0.0,
+                p150: parseFloat(document.getElementById('percent150').value) || 0.0,
+                p200: parseFloat(document.getElementById('percent200').value) || 0.0,
+                month: month,
+                username: username
+            };
+
+            // Send data to the server using Fetch API
+            fetch('/api/records', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newRecord)
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Redirect back to the table on success
+                    window.location.href = backUrl;
+                } else {
+                    response.text().then(text => alert('Error saving record! Server says: ' + text));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Network error while saving record.');
+            });
+        }
+    </script>
+</body>
+</html>
